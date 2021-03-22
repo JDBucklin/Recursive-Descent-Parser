@@ -1,54 +1,109 @@
 #include <iostream>
-#include <regex>
 #include <string>
-#include <functional>
+#include <vector>
 
 using namespace std;
 
-void compute(string& input, regex pattern, char opp) {
-    smatch match;
-    function<int(int, int)> operation;
+class Token {
+    public:
+    virtual ~Token() {};
+    virtual void print() = 0;
+};
 
-    switch(opp) {
-    case '+': {
-        operation = [] (int op1, int op2) {
-            return op1 + op2;
-        };
-        break;
+class Number : public Token {
+    public:
+    Number(int value) {
+        this->value = value;
     }
-    case '*': {
-        operation = [] (int op1, int op2) {
-            return op1 * op2;
-        };
-        break;
+    void print() {
+        cout << value;
     }
-    };
+    private:
+    int value;
+};
 
-    while(regex_search(input, match, pattern)) {
-        int op1 = stoi(match[1].str());
-        int op2 = stoi(match[2].str());
-        string result = to_string(operation(op1, op2));
-        input.replace(match.position(), match.length(), result);
-        cout << input << endl;
+class Add : public Token {
+    public:
+    void print() {cout << "+";}
+};
+
+class Multiply : public Token {
+    public:
+    void print() {cout << "*";}
+};
+
+class OpenParen : public Token {
+    public:
+    void print() {cout << "(";}
+};
+
+class CloseParen : public Token {
+    public:
+    void print() {cout << ")";}
+};
+
+class Lexer {
+    public:
+    ~Lexer() {
+        tokens.clear();
     }
-    return;
-}
+
+    void Tokenize(string input) {
+        tokens.clear();
+        int pos = 0;
+        while(pos != input.length()) {
+            if (input[pos] == ' ') { // space
+                pos++;
+            } else if (isdigit(input[pos])) { // number
+                int startPos = pos++;
+                while(pos != input.length() && isdigit(input[pos])) {
+                    pos++;
+                }
+                tokens.push_back(new Number(stoi(input.substr(startPos, pos - startPos))));
+            } else if (input[pos] == '+') {
+                tokens.push_back(new Add());
+                pos++;
+            } else if (input[pos] == '*') {
+                tokens.push_back(new Multiply());
+                pos++;
+            } else if (input[pos] == '(') {
+                tokens.push_back(new OpenParen());
+                pos++;
+            } else if (input[pos] == ')') {
+                tokens.push_back(new CloseParen());
+                pos++;
+            } else {
+                cout << "unrecognized character in input: " << input[pos] << endl;
+                tokens.clear();
+                break;
+            }
+        }
+    }
+
+    void printTokens() {
+        if (tokens.empty()) {
+            cout << "no tokens to print" << endl;
+            return;
+        }
+
+        for(Token* token : tokens) {
+            token->print();
+        }
+        cout << endl;
+    }
+
+    private:
+    vector<Token*> tokens;
+};
 
 int main(int argc, char* argv[]) {
-    std::smatch match;
-    std::regex add("(\\d+)\\s*\\+\\s*(\\d+)");
-    std::regex mult("(\\d+)\\s*\\*\\s*(\\d+)");
     std::string input;
+    Lexer lexer = Lexer();
 
     while(1) {
         cout << "Enter expression: ";
         getline(std::cin, input);
-        compute(input, mult, '*');
-        compute(input, add, '+');
-        // input = regex_replace(input, std::regex("\\("), "");
-        // input = regex_replace(input, std::regex("\\)"), "");
-        // cout << input << endl;
-        // compute(input, mult, '*');
-        // compute(input, add, '+');
+        lexer.Tokenize(input);
+        lexer.printTokens();
     }
 }
