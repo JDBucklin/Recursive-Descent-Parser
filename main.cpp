@@ -10,9 +10,9 @@ class Token {
     virtual void print() = 0;
 };
 
-class Number : public Token {
+class Integer : public Token {
     public:
-    Number(int value) {
+    Integer(int value) {
         this->value = value;
     }
     void print() {
@@ -52,14 +52,14 @@ class Lexer {
         tokens.clear();
         int pos = 0;
         while(pos != input.length()) {
-            if (input[pos] == ' ') { // space
+            if (input[pos] == ' ') {
                 pos++;
-            } else if (isdigit(input[pos])) { // number
+            } else if (isdigit(input[pos])) {
                 int startPos = pos++;
                 while(pos != input.length() && isdigit(input[pos])) {
                     pos++;
                 }
-                tokens.push_back(new Number(stoi(input.substr(startPos, pos - startPos))));
+                tokens.push_back(new Integer(stoi(input.substr(startPos, pos - startPos))));
             } else if (input[pos] == '+') {
                 tokens.push_back(new Add());
                 pos++;
