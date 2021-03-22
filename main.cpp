@@ -1,45 +1,54 @@
 #include <iostream>
 #include <regex>
+#include <string>
+#include <functional>
 
 using namespace std;
 
-class Expr {
-    public:
-    virtual int Eval() = 0;
-};
+void compute(string& input, regex pattern, char opp) {
+    smatch match;
+    function<int(int, int)> operation;
 
-class Number : public Expr {
-    public:
-    Number(int value) {
-        this->value = value;
+    switch(opp) {
+    case '+': {
+        operation = [] (int op1, int op2) {
+            return op1 + op2;
+        };
+        break;
     }
-
-    int Eval() {
-        return value;
+    case '*': {
+        operation = [] (int op1, int op2) {
+            return op1 * op2;
+        };
+        break;
     }
+    };
 
-    private:
-    int value;
-};
-
-class Add : public Expr {
-    public:
-    Add(Expr* lval, Expr* rval) {
-        this->lval = lval;
-        this->rval = rval;
+    while(regex_search(input, match, pattern)) {
+        int op1 = stoi(match[1].str());
+        int op2 = stoi(match[2].str());
+        string result = to_string(operation(op1, op2));
+        input.replace(match.position(), match.length(), result);
+        cout << input << endl;
     }
-
-    int Eval() {
-        return lval->Eval() + rval->Eval();
-    }
-
-    private:
-    Expr* lval;
-    Expr* rval;
-};
-
+    return;
+}
 
 int main(int argc, char* argv[]) {
-    Expr *temp = new Add(new Number(5), new Add(new Number(7), new Number(9)));
-    cout << temp->Eval() << endl;
+    std::smatch match;
+    std::regex add("(\\d+)\\s*\\+\\s*(\\d+)");
+    std::regex mult("(\\d+)\\s*\\*\\s*(\\d+)");
+    std::string input;
+
+    while(1) {
+        cout << "Enter expression: ";
+        getline(std::cin, input);
+        compute(input, mult, '*');
+        compute(input, add, '+');
+        // input = regex_replace(input, std::regex("\\("), "");
+        // input = regex_replace(input, std::regex("\\)"), "");
+        // cout << input << endl;
+        // compute(input, mult, '*');
+        // compute(input, add, '+');
+    }
 }
