@@ -10,9 +10,7 @@ class Token {
     public:
     virtual ~Token() {};
     virtual void print() = 0;
-
-    private:
-    int value;
+    virtual TokenType getType() = 0;
 };
 
 class Integer : public Token {
@@ -23,7 +21,9 @@ class Integer : public Token {
     void print() {
         cout << value;
     }
-    const TokenType type = integer;
+    TokenType getType() {
+        return integer;
+    }
 
     private:
     int value;
@@ -32,25 +32,33 @@ class Integer : public Token {
 class Add : public Token {
     public:
     void print() {cout << "+";}
-    const TokenType type = add;
+    TokenType getType() {
+        return add;
+    }
 };
 
 class Multiply : public Token {
     public:
     void print() {cout << "*";}
-    const TokenType type = multiply;
+    TokenType getType() {
+        return multiply;
+    }
 };
 
 class OpenParen : public Token {
     public:
     void print() {cout << "(";}
-    const TokenType type = openParen;
+    TokenType getType() {
+        return openParen;
+    }
 };
 
 class CloseParen : public Token {
     public:
     void print() {cout << ")";}
-    const TokenType type = closeParen;
+    TokenType getType() {
+        return closeParen;
+    }
 };
 
 class Lexer {
@@ -103,8 +111,31 @@ class Lexer {
         cout << endl;
     }
 
+    void readToken() {
+        if(tokenIndex >= tokens.size()-1) {
+            return;
+        }
+        tokenIndex++;
+    }
+
+    bool currentTokenIs(TokenType type) {
+        return type == tokens[tokenIndex]->getType();
+    }
+
+    void resetTokenReader() {
+        tokenIndex = 0;
+    }
+
     private:
+    int tokenIndex;
     vector<Token*> tokens;
+};
+
+class Parser {
+    public:
+    void Parse(Lexer *lexer) {
+        
+    }
 };
 
 int main(int argc, char* argv[]) {
