@@ -4,10 +4,15 @@
 
 using namespace std;
 
+enum TokenType {integer, add, multiply, openParen, closeParen};
+
 class Token {
     public:
     virtual ~Token() {};
     virtual void print() = 0;
+
+    private:
+    int value;
 };
 
 class Integer : public Token {
@@ -18,6 +23,8 @@ class Integer : public Token {
     void print() {
         cout << value;
     }
+    const TokenType type = integer;
+
     private:
     int value;
 };
@@ -25,21 +32,25 @@ class Integer : public Token {
 class Add : public Token {
     public:
     void print() {cout << "+";}
+    const TokenType type = add;
 };
 
 class Multiply : public Token {
     public:
     void print() {cout << "*";}
+    const TokenType type = multiply;
 };
 
 class OpenParen : public Token {
     public:
     void print() {cout << "(";}
+    const TokenType type = openParen;
 };
 
 class CloseParen : public Token {
     public:
     void print() {cout << ")";}
+    const TokenType type = closeParen;
 };
 
 class Lexer {
