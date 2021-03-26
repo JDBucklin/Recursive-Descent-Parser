@@ -139,6 +139,10 @@ class Lexer {
         return tokens[currentToken]->getValue();
     }
 
+    bool allTokensRead() {
+        return currentToken >= tokens.size();
+    }
+
     private:
     int currentToken = 0;
     vector<Token::Token*> tokens;
@@ -201,23 +205,27 @@ class Integer : public Expr {
     int value;
 };
 
+// The grammar for this parser is as follows:
+// E -> TE`
+// E -> T
+// E`-> + TE`
+// E`-> (END)
+// T -> NT`
+// T -> N
+// T`-> * NT`
+// T`-> (END)
+// N -> Int
+// N -> (E)
+// In the ParseE and ParseT functions, the while loop accounts for E` and T`
+// in the grammar. It is what allows it to repeat and keep consuming addition
+// or multiplication symbols.
 class Parser {
     public:
-    // Grammar:
-    // E -> TE`
-    // E -> T
-    // E`-> + TE`
-    // E`-> (END)
-    // T -> NT`
-    // T -> N
-    // T`-> * NT`
-    // T`-> (END)
-    // N -> Int
-    // N -> (E)
     void Parse(Lexer *lexer) {
         e = ParseE(lexer);
-        if(!e) {
+        if(!e || !lexer->allTokensRead()) {
             cout << "unable to parse expression" << endl;
+            e = NULL;
         }
     }
 
