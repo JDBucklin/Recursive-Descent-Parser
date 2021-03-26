@@ -264,6 +264,16 @@ class Parser {
             Expr* n = new Integer(lexer->currentTokenValue());
             lexer->readToken();
             return n;
+        } else if (lexer->currentTokenIs(Token::openParen)) {
+            lexer->readToken();
+            Expr* n = ParseE(lexer);
+            if (!n) {
+                return NULL;
+            }
+            if (lexer->currentTokenIs(Token::closeParen)) {
+                lexer->readToken();
+            }
+            return n;
         }
         return NULL;
     }
