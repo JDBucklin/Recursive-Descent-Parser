@@ -288,7 +288,6 @@ int main(int argc, char* argv[]) {
         cout << "Enter expression: ";
         getline(std::cin, input);
         lexer.Tokenize(input);
-        // lexer.printTokens();
         parser.Parse(&lexer);
         parser.Eval();
     }
