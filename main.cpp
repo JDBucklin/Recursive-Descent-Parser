@@ -4,61 +4,70 @@
 
 using namespace std;
 
-enum TokenType {integer, add, multiply, openParen, closeParen};
+namespace Token {
 
-class Token {
-    public:
-    virtual ~Token() {};
-    virtual void print() = 0;
-    virtual TokenType getType() = 0;
-};
+    enum TokenType {integer, add, multiply, openParen, closeParen};
 
-class Integer : public Token {
-    public:
-    Integer(int value) {
-        this->value = value;
-    }
-    void print() {
-        cout << value;
-    }
-    TokenType getType() {
-        return integer;
-    }
+    class Token {
+        public:
+        virtual ~Token() {};
+        virtual void print() = 0;
+        virtual TokenType getType() = 0;
+        virtual int getValue() {
+            return 0;
+        }
+    };
 
-    private:
-    int value;
-};
+    class Integer : public Token {
+        public:
+        Integer(int value) {
+            this->value = value;
+        }
+        void print() {
+            cout << value;
+        }
+        TokenType getType() {
+            return integer;
+        }
+        int getValue() {
+            return value;
+        }
 
-class Add : public Token {
-    public:
-    void print() {cout << "+";}
-    TokenType getType() {
-        return add;
-    }
-};
+        private:
+        int value;
+    };
 
-class Multiply : public Token {
-    public:
-    void print() {cout << "*";}
-    TokenType getType() {
-        return multiply;
-    }
-};
+    class Add : public Token {
+        public:
+        void print() {cout << "+";}
+        TokenType getType() {
+            return add;
+        }
+    };
 
-class OpenParen : public Token {
-    public:
-    void print() {cout << "(";}
-    TokenType getType() {
-        return openParen;
-    }
-};
+    class Multiply : public Token {
+        public:
+        void print() {cout << "*";}
+        TokenType getType() {
+            return multiply;
+        }
+    };
 
-class CloseParen : public Token {
-    public:
-    void print() {cout << ")";}
-    TokenType getType() {
-        return closeParen;
-    }
+    class OpenParen : public Token {
+        public:
+        void print() {cout << "(";}
+        TokenType getType() {
+            return openParen;
+        }
+    };
+
+    class CloseParen : public Token {
+        public:
+        void print() {cout << ")";}
+        TokenType getType() {
+            return closeParen;
+        }
+    };
 };
 
 class Lexer {
@@ -69,6 +78,7 @@ class Lexer {
 
     void Tokenize(string input) {
         tokens.clear();
+        currentToken = 0;
         int pos = 0;
         while(pos != input.length()) {
             if (input[pos] == ' ') {
@@ -78,18 +88,18 @@ class Lexer {
                 while(pos != input.length() && isdigit(input[pos])) {
                     pos++;
                 }
-                tokens.push_back(new Integer(stoi(input.substr(startPos, pos - startPos))));
+                tokens.push_back(new Token::Integer(stoi(input.substr(startPos, pos - startPos))));
             } else if (input[pos] == '+') {
-                tokens.push_back(new Add());
+                tokens.push_back(new Token::Add());
                 pos++;
             } else if (input[pos] == '*') {
-                tokens.push_back(new Multiply());
+                tokens.push_back(new Token::Multiply());
                 pos++;
             } else if (input[pos] == '(') {
-                tokens.push_back(new OpenParen());
+                tokens.push_back(new Token::OpenParen());
                 pos++;
             } else if (input[pos] == ')') {
-                tokens.push_back(new CloseParen());
+                tokens.push_back(new Token::CloseParen());
                 pos++;
             } else {
                 cout << "unrecognized character in input: " << input[pos] << endl;
@@ -105,47 +115,181 @@ class Lexer {
             return;
         }
 
-        for(Token* token : tokens) {
+        for(Token::Token* token : tokens) {
             token->print();
         }
         cout << endl;
     }
 
     void readToken() {
-        if(tokenIndex >= tokens.size()-1) {
+        if (tokens.size() == 0) {
             return;
         }
-        tokenIndex++;
+        currentToken++;
     }
 
-    bool currentTokenIs(TokenType type) {
-        return type == tokens[tokenIndex]->getType();
+    bool currentTokenIs(Token::TokenType type) {
+        if (tokens.size() == 0 || currentToken >= tokens.size()) {
+            return false;
+        }
+        return type == tokens[currentToken]->getType();
     }
 
-    void resetTokenReader() {
-        tokenIndex = 0;
+    int currentTokenValue() {
+        return tokens[currentToken]->getValue();
     }
 
     private:
-    int tokenIndex;
-    vector<Token*> tokens;
+    int currentToken = 0;
+    vector<Token::Token*> tokens;
+};
+
+class Expr {
+    public:
+    virtual ~Expr() {};
+    virtual int Eval() = 0;
+};
+
+class Add : public Expr {
+    public:
+    Add(Expr* lVal, Expr* rVal) {
+        this->lVal = lVal;
+        this->rVal = rVal;
+    }
+
+    int Eval() {
+        if (!lVal || !rVal) {
+            return 0;
+        }
+        return lVal->Eval() + rVal->Eval();
+    }
+
+    private:
+    Expr* lVal;
+    Expr* rVal;
+};
+
+class Multiply : public Expr {
+    public:
+    Multiply(Expr* lVal, Expr* rVal) {
+        this->lVal = lVal;
+        this->rVal = rVal;
+    }
+
+    int Eval() {
+        if (!lVal || !rVal) {
+            return 0;
+        }
+        return lVal->Eval() * rVal->Eval();
+    }
+
+    private:
+    Expr* lVal;
+    Expr* rVal;
+};
+
+class Integer : public Expr {
+    public:
+    Integer(int value) {
+        this->value = value;
+    }
+    int Eval() {
+        return value;
+    }
+
+    private:
+    int value;
 };
 
 class Parser {
     public:
+    // Grammar:
+    // E -> TE`
+    // E -> T
+    // E`-> + TE`
+    // E`-> (END)
+    // T -> NT`
+    // T -> N
+    // T`-> * NT`
+    // T`-> (END)
+    // N -> Int
+    // N -> (E)
     void Parse(Lexer *lexer) {
-        
+        e = ParseE(lexer);
+        if(!e) {
+            cout << "unable to parse expression" << endl;
+        }
     }
+
+    Expr* ParseE(Lexer *lexer) {
+        Expr* lVal = ParseT(lexer);
+        if (!lVal) {
+            return NULL;
+        }
+        while(true) {
+            if (lexer->currentTokenIs(Token::add)) {
+                lexer->readToken();
+                Expr *rVal = ParseT(lexer);
+                if (!rVal) {
+                    return NULL;
+                }
+                lVal = new Add(lVal, rVal);
+            } else {
+                return lVal;
+            }
+        }
+    }
+
+    Expr* ParseT(Lexer *lexer) {
+        Expr* lVal = ParseN(lexer);
+        if (!lVal) {
+            return NULL;
+        }
+        while(true) {
+            if (lexer->currentTokenIs(Token::multiply)) {
+                lexer->readToken();
+                Expr* rVal = ParseN(lexer);
+                if (!rVal) {
+                    return NULL;
+                }
+                lVal = new Multiply(lVal, rVal);
+            } else {
+                return lVal;
+            }
+        }
+    }
+
+    Expr* ParseN(Lexer *lexer) {
+        if (lexer->currentTokenIs(Token::integer)) {
+            Expr* n = new Integer(lexer->currentTokenValue());
+            lexer->readToken();
+            return n;
+        }
+        return NULL;
+    }
+
+    void Eval() {
+        if (!e) {
+            return;
+        }
+        cout << e->Eval() << endl;
+    }
+
+    private:
+    Expr* e = NULL;
 };
 
 int main(int argc, char* argv[]) {
     std::string input;
     Lexer lexer = Lexer();
+    Parser parser = Parser();
 
     while(1) {
         cout << "Enter expression: ";
         getline(std::cin, input);
         lexer.Tokenize(input);
-        lexer.printTokens();
+        // lexer.printTokens();
+        parser.Parse(&lexer);
+        parser.Eval();
     }
 }
