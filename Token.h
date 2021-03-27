@@ -1,3 +1,5 @@
+// This file contains the declaration of the Token classes
+
 namespace Token {
 
     enum TokenType {integer, add, multiply, openParen, closeParen};

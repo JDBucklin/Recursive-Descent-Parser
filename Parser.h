@@ -1,3 +1,5 @@
+// This file contains the declaration of the Parser class
+
 #include "Lexer.h"
 #include "Expr.h"
 

@@ -1,7 +1,12 @@
+// This file contains the implemenation of the Parser class
+
 #include "Parser.h"
 
 using namespace std;
 
+// Parse parses mathematical expression
+// Parameters:
+// lexer: lexer that has already tokenized a mathematical expression
 void Parser::Parse(Lexer *lexer) {
     e = ParseE(lexer);
     if(!e || !lexer->allTokensRead()) {
@@ -10,6 +15,9 @@ void Parser::Parse(Lexer *lexer) {
     }
 }
 
+// ParseE parses the addition part of math expression
+// Parameters:
+// lexer: lexer that has already tokenized a mathematical expression
 Expr* Parser::ParseE(Lexer *lexer) {
     Expr* lVal = ParseT(lexer);
     if (!lVal) {
@@ -29,6 +37,9 @@ Expr* Parser::ParseE(Lexer *lexer) {
     }
 }
 
+// ParseT parses the multiplication part of math expression
+// Parameters:
+// lexer: lexer that has already tokenized a mathematical expression
 Expr* Parser::ParseT(Lexer *lexer) {
     Expr* lVal = ParseN(lexer);
     if (!lVal) {
@@ -48,6 +59,9 @@ Expr* Parser::ParseT(Lexer *lexer) {
     }
 }
 
+// ParseN parses the integer and parenthesis part of math expression
+// Parameters:
+// lexer: lexer that has already tokenized a mathematical expression
 Expr* Parser::ParseN(Lexer *lexer) {
     if (lexer->currentTokenIs(Token::integer)) {
         Expr* n = new Integer(lexer->currentTokenValue());
@@ -67,6 +81,7 @@ Expr* Parser::ParseN(Lexer *lexer) {
     return NULL;
 }
 
+// Eval evaluates parse tree of mathematical expression
 void Parser::Eval() {
     if (!e) {
         return;
