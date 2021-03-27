@@ -1,3 +1,5 @@
+// This file contains the declaration of the Expr classes
+
 class Expr {
     public:
     virtual ~Expr();

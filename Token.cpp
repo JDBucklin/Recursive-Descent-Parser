@@ -1,4 +1,4 @@
-// This file contains the implemenation of the Token class
+// This file contains the implemenation of the Token classes
 
 #include <iostream>
 #include "Token.h"
