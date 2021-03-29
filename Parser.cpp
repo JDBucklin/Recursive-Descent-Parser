@@ -9,8 +9,11 @@ using namespace std;
 // lexer: lexer that has already tokenized a mathematical expression
 void Parser::Parse(Lexer *lexer) {
     e = ParseE(lexer);
-    if(!e || !lexer->allTokensRead()) {
+    if (!e) {
         cout << "unable to parse expression" << endl;
+    } if (!lexer->allTokensRead()) {
+        cout << "unable to parse expression" << endl;
+        delete e;
         e = NULL;
     }
 }
@@ -28,6 +31,9 @@ Expr* Parser::ParseE(Lexer *lexer) {
             lexer->readToken();
             Expr *rVal = ParseT(lexer);
             if (!rVal) {
+                if (lVal) {
+                    delete lVal;
+                }
                 return NULL;
             }
             lVal = new Add(lVal, rVal);
@@ -50,6 +56,9 @@ Expr* Parser::ParseT(Lexer *lexer) {
             lexer->readToken();
             Expr* rVal = ParseN(lexer);
             if (!rVal) {
+                if (lVal) {
+                    delete lVal;
+                }
                 return NULL;
             }
             lVal = new Multiply(lVal, rVal);
@@ -73,6 +82,7 @@ Expr* Parser::ParseN(Lexer *lexer) {
         if (!n) {
             return NULL;
         }
+        // Get rid of closing paren
         if (lexer->currentTokenIs(Token::closeParen)) {
             lexer->readToken();
         }

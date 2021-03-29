@@ -18,6 +18,16 @@ Add::Add(Expr* lVal, Expr* rVal) {
     this->rVal = rVal;
 }
 
+// Destructor
+Add::~Add() {
+    if (this->lVal) {
+        delete this->lVal;
+    }
+    if (this->rVal) {
+        delete this->rVal;
+    }
+}
+
 // Eval adds the result of two expressions
 // returns 0 if either expression is empty
 int Add::Eval() {
@@ -36,6 +46,16 @@ int Add::Eval() {
 Multiply::Multiply(Expr* lVal, Expr* rVal) {
     this->lVal = lVal;
     this->rVal = rVal;
+}
+
+// Destructor
+Multiply::~Multiply() {
+    if (this->lVal) {
+        delete this->lVal;
+    }
+    if (this->rVal) {
+        delete this->rVal;
+    }
 }
 
 // Eval multiplies the result of two expressions

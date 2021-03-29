@@ -9,6 +9,7 @@ class Expr {
 class Add : public Expr {
     public:
     Add(Expr* lVal, Expr* rVal);
+    ~Add();
     int Eval();
 
     private:
@@ -19,6 +20,7 @@ class Add : public Expr {
 class Multiply : public Expr {
     public:
     Multiply(Expr* lVal, Expr* rVal);
+    ~Multiply();
     int Eval();
 
     private:
