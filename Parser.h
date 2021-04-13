@@ -7,11 +7,11 @@
 // E -> TE`
 // E -> T
 // E`-> + TE`
-// E`-> (END)
+// E`-> END
 // T -> NT`
 // T -> N
 // T`-> * NT`
-// T`-> (END)
+// T`-> END
 // N -> Int
 // N -> (E)
 // In the ParseE and ParseT functions, the while loop accounts for E` and T`

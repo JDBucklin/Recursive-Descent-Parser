@@ -14,11 +14,11 @@ The grammar for this parser is:
 E -> TE`
 E -> T
 E`-> + TE`
-E`-> (END)`
+E`-> END
 T -> NT`
 T -> N
 T`-> * NT`
-T`-> (END)
+T`-> END
 N -> Int
 N -> (E)
 ```
