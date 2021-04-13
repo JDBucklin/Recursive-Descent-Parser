@@ -83,9 +83,10 @@ Expr* Parser::ParseN(Lexer *lexer) {
             return NULL;
         }
         // Get rid of closing paren
-        if (lexer->currentTokenIs(Token::closeParen)) {
-            lexer->readToken();
+        if (!lexer->currentTokenIs(Token::closeParen)) {
+            return NULL;
         }
+        lexer->readToken();
         return n;
     }
     return NULL;
